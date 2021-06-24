@@ -9,12 +9,7 @@ public class EnrollCtrl {
 	public void enroll(Student s, List<CSE> courses) throws EnrollmentRulesViolationException {
         Map<Term, Map<Course, Double>> transcript = s.getTranscript();
 		for (CSE o : courses) {
-            for (Map.Entry<Term, Map<Course, Double>> tr : transcript.entrySet()) {
-                for (Map.Entry<Course, Double> r : tr.getValue().entrySet()) {
-                    if (r.getKey().equals(o.getCourse()) && r.getValue() >= 10)
-                        throw new EnrollmentRulesViolationException(String.format("The student has already passed %s", o.getCourse().getName()));
-                }
-            }
+            checkIfAlreadyPassed(o, transcript);
 			List<Course> prereqs = o.getCourse().getPrerequisites();
 			nextPre:
 			for (Course pre : prereqs) {
@@ -39,6 +34,15 @@ public class EnrollCtrl {
 		for (CSE o : courses)
 			s.takeCourse(o.getCourse(), o.getSection());
 	}
+
+    private void checkIfAlreadyPassed(CSE o, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
+        for (Map.Entry<Term, Map<Course, Double>> tr : transcript.entrySet()) {
+            for (Map.Entry<Course, Double> r : tr.getValue().entrySet()) {
+                if (r.getKey().equals(o.getCourse()) && r.getValue() >= 10)
+                    throw new EnrollmentRulesViolationException(String.format("The student has already passed %s", o.getCourse().getName()));
+            }
+        }
+    }
 
     private void checkUnitsLimitation(List<CSE> courses, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
         int unitsRequested = 0;
