@@ -8,16 +8,34 @@ import domain.exceptions.EnrollmentRulesViolationException;
 public class EnrollCtrl {
 	public void enroll(Student s, List<CSE> courses) throws EnrollmentRulesViolationException {
         Map<Term, Map<Course, Double>> transcript = s.getTranscript();
-		for (CSE o : courses) {
-            checkIfAlreadyPassed(o, transcript);
-            checkPrerequisites(o, transcript);
-            checkExamTimeCollision(o, courses);
-            checkDuplicateRequest(o, courses);
-		}
-        checkUnitsLimitation(courses, transcript);
+        checkExceptions(courses, transcript);
 		for (CSE o : courses)
 			s.takeCourse(o.getCourse(), o.getSection());
 	}
+
+    private void checkExceptions(List<CSE> courses, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
+		String errors = "";
+        for (CSE o : courses) {
+            try {checkIfAlreadyPassed(o, transcript);}
+            catch(Exception e) {errors += e.toString()+"\n";}
+
+            try {checkPrerequisites(o, transcript);}
+            catch(Exception e) {errors += e.toString()+"\n";}
+
+            try {checkExamTimeCollision(o, courses);}
+            catch(Exception e) {errors += e.toString()+"\n";}
+
+            try {checkDuplicateRequest(o, courses);}
+            catch(Exception e) {errors += e.toString()+"\n";}
+		}
+        
+        try {checkUnitsLimitation(courses, transcript);}
+        catch(Exception e) {errors += e.toString()+"\n";}
+
+        if (errors.length() > 0) {
+            throw new EnrollmentRulesViolationException(errors);
+        }
+    }
 
     private void checkExamTimeCollision(CSE o, List<CSE> courses) throws EnrollmentRulesViolationException {
         for (CSE o2 : courses) {
