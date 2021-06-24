@@ -72,9 +72,7 @@ public class EnrollCtrl {
     }
 
     private String unitsLimitationErrors(List<Offering> offerings, Student student) throws EnrollmentRulesViolationException {
-        int unitsRequested = 0;
-		for (Offering offering : offerings)
-			unitsRequested += offering.getCourse().getUnits();
+        int unitsRequested = offerings.stream().mapToInt(o -> o.getCourse().getUnits()).sum();
         double gpa = calculateGpa(student);
 		if ((gpa < 12 && unitsRequested > 14) ||
 				(gpa < 16 && unitsRequested > 16) ||
