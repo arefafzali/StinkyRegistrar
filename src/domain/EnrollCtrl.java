@@ -16,7 +16,7 @@ public class EnrollCtrl {
     private void checkExceptions(List<Offering> offerings, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
 		String errors = "";
 
-        try {checkIfAlreadyPassed(offerings, transcript);}
+        try {checkAnyAlreadyPassed(offerings, transcript);}
         catch(Exception e) {errors += e.toString()+"\n";}
 
         for (Offering offering : offerings) {
@@ -71,7 +71,7 @@ public class EnrollCtrl {
         }
     }
 
-    private void checkIfAlreadyPassed(List<Offering> offerings, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
+    private void checkAnyAlreadyPassed(List<Offering> offerings, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
 		String errors = "";
         for (Offering offering : offerings) {
             for (Map.Entry<Term, Map<Course, Double>> tr : transcript.entrySet()) {
