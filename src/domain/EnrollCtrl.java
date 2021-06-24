@@ -11,18 +11,22 @@ public class EnrollCtrl {
 		for (CSE o : courses) {
             checkIfAlreadyPassed(o, transcript);
             checkPrerequisites(o, transcript);
-            for (CSE o2 : courses) {
-                if (o == o2)
-                    continue;
-                if (o.getExamTime().equals(o2.getExamTime()))
-                    throw new EnrollmentRulesViolationException(String.format("Two offerings %s and %s have the same exam time", o, o2));
-            }
+            checkExamTimeCollision(o, courses);
             checkDuplicateRequest(o, courses);
 		}
         checkUnitsLimitation(courses, transcript);
 		for (CSE o : courses)
 			s.takeCourse(o.getCourse(), o.getSection());
 	}
+
+    private void checkExamTimeCollision(CSE o, List<CSE> courses) throws EnrollmentRulesViolationException {
+        for (CSE o2 : courses) {
+            if (o == o2)
+                continue;
+            if (o.getExamTime().equals(o2.getExamTime()))
+                throw new EnrollmentRulesViolationException(String.format("Two offerings %s and %s have the same exam time", o, o2));
+        }
+    }
 
     private void checkDuplicateRequest(CSE o, List<CSE> courses) throws EnrollmentRulesViolationException {
         for (CSE o2 : courses) {
