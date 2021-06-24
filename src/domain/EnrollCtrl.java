@@ -16,14 +16,22 @@ public class EnrollCtrl {
                     continue;
                 if (o.getExamTime().equals(o2.getExamTime()))
                     throw new EnrollmentRulesViolationException(String.format("Two offerings %s and %s have the same exam time", o, o2));
-                if (o.getCourse().equals(o2.getCourse()))
-                    throw new EnrollmentRulesViolationException(String.format("%s is requested to be taken twice", o.getCourse().getName()));
             }
+            checkDuplicateRequest(o, courses);
 		}
         checkUnitsLimitation(courses, transcript);
 		for (CSE o : courses)
 			s.takeCourse(o.getCourse(), o.getSection());
 	}
+
+    private void checkDuplicateRequest(CSE o, List<CSE> courses) throws EnrollmentRulesViolationException {
+        for (CSE o2 : courses) {
+            if (o == o2)
+                continue;
+            if (o.getCourse().equals(o2.getCourse()))
+                throw new EnrollmentRulesViolationException(String.format("%s is requested to be taken twice", o.getCourse().getName()));
+        }
+    }
 
     private void checkPrerequisites(CSE o, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
         List<Course> prereqs = o.getCourse().getPrerequisites();
