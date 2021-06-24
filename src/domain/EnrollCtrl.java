@@ -56,8 +56,7 @@ public class EnrollCtrl {
     private String prerequisitesErrors(List<Offering> offerings, Student student) throws EnrollmentRulesViolationException {
 		String errors = "";
         for (Offering offering : offerings) {
-            List<Course> prereqs = offering.getCourse().getPrerequisites();
-            for (Course pre : prereqs) {
+            for (Course pre : offering.getCourse().getPrerequisites()) {
                 if (!hasPassed(student, pre))
                     errors += String.format("The student has not passed %s as a prerequisite of %s\n", pre.getName(), offering.getCourse().getName());
             }
