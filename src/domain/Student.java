@@ -9,17 +9,17 @@ public class Student {
 	private String name;
 
 	private Transcript transcript;
-	private List<Offering> currentTerm;
+	private List<Offering> currentTermOfferings;
 
 	public Student(String id, String name) {
 		this.id = id;
 		this.name = name;
 		this.transcript = new Transcript();
-		this.currentTerm = new ArrayList<>();
+		this.currentTermOfferings = new ArrayList<>();
 	}
 	
 	public void takeCourse(Course c, int section) {
-		currentTerm.add(new Offering(c, section));
+		currentTermOfferings.add(new Offering(c, section));
 	}
 
 	public Transcript getTranscript() {
@@ -38,8 +38,8 @@ public class Student {
 		return this.transcript.calculateGpa();
 	}
 
-    public List<Offering> getCurrentTerm() {
-        return currentTerm;
+    public List<Offering> getCurrentTermOfferings() {
+        return currentTermOfferings;
     }
 
     public String getId() {
