@@ -55,7 +55,7 @@ public class EnrollCtrl {
 		String errors = "";
         for (Offering offering : offerings) {
             for (Course pre : offering.getCourse().getPrerequisites()) {
-                if (!hasPassed(student, pre))
+                if (!student.hasPassed(pre))
                     errors += String.format("The student has not passed %s as a prerequisite of %s\n", pre.getName(), offering.getCourse().getName());
             }
         }
@@ -65,7 +65,7 @@ public class EnrollCtrl {
     private String anyAlreadyPassedErrors(List<Offering> offerings, Student student) throws EnrollmentRulesViolationException {
 		String errors = "";
         for (Offering offering : offerings) {
-            if (hasPassed(student, offering.getCourse()))
+            if (student.hasPassed(offering.getCourse()))
                 errors += String.format("The student has already passed %s\n", offering.getCourse().getName());
         }
         return errors;
@@ -73,35 +73,11 @@ public class EnrollCtrl {
 
     private String unitsLimitationErrors(List<Offering> offerings, Student student) throws EnrollmentRulesViolationException {
         int unitsRequested = offerings.stream().mapToInt(o -> o.getCourse().getUnits()).sum();
-        double gpa = calculateGpa(student);
+        double gpa = student.calculateGpa();
 		if ((gpa < 12 && unitsRequested > 14) ||
 				(gpa < 16 && unitsRequested > 16) ||
 				(unitsRequested > 20))
 			return String.format("Number of units (%d) requested does not match GPA of %f\n", unitsRequested, gpa);
         return "";
-    }
-
-    private double calculateGpa(Student student){
-        double points = 0;
-		int totalUnits = 0;
-        for (Map.Entry<Term, Map<Course, Double>> tr : student.getTranscript().entrySet()) {
-            for (Map.Entry<Course, Double> r : tr.getValue().entrySet()) {
-                points += r.getValue() * r.getKey().getUnits();
-                totalUnits += r.getKey().getUnits();
-            }
-		}
-		double gpa = points / totalUnits;
-        return gpa;
-    }
-
-    private boolean hasPassed(Student student, Course course) {
-        Map<Term, Map<Course, Double>> transcript = student.getTranscript();
-        for (Map.Entry<Term, Map<Course, Double>> tr : transcript.entrySet()) {
-            for (Map.Entry<Course, Double> r : tr.getValue().entrySet()) {
-                if (r.getKey().equals(course) && r.getValue() >= 10)
-                    return true;
-            }
-        }
-        return false;
     }
 }
