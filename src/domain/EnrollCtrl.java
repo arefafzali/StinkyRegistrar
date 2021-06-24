@@ -74,9 +74,11 @@ public class EnrollCtrl {
     private String unitsLimitationErrors(List<Offering> offerings, Student student) throws EnrollmentRulesViolationException {
         int unitsRequested = offerings.stream().mapToInt(o -> o.getCourse().getUnits()).sum();
         double gpa = student.calculateGpa();
-		if ((gpa < 12 && unitsRequested > 14) ||
+		if (
+                (gpa < 12 && unitsRequested > 14) ||
 				(gpa < 16 && unitsRequested > 16) ||
-				(unitsRequested > 20))
+				(unitsRequested > 20)
+            )
 			return String.format("Number of units (%d) requested does not match GPA of %f\n", unitsRequested, gpa);
         return "";
     }

@@ -38,7 +38,9 @@ public class Transcript {
             return sum;
         }
     }
+
     private Map<Term, TermTranscript> termTranscripts;
+    
     public Transcript() {
         termTranscripts = new HashMap<>();
     }
@@ -53,7 +55,7 @@ public class Transcript {
         for (Map.Entry<Term, TermTranscript> termTranscript : termTranscripts.entrySet()) {
             if (termTranscript.getValue().hasPassed(course))
                     return true;
-            }
+        }
         return false;
     }
 

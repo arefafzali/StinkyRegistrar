@@ -30,6 +30,4 @@ public class Term {
 	public Date getStartDate() {
 		return startDate;
 	}
-	
-	
 }

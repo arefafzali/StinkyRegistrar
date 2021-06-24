@@ -7,7 +7,6 @@ public class Course {
 	private String id;
 	private String name;
 	private int units;
-	
 	List<Course> prerequisites;
 
 	public Course(String id, String name, int units) {
