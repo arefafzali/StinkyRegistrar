@@ -22,10 +22,10 @@ public class EnrollCtrl {
         try {checkPrerequisites(offerings, transcript);}
         catch(Exception e) {errors += e.toString()+"\n";}
 
-        for (Offering offering : offerings) {
+        try {checkExamTimeCollision(offerings);}
+        catch(Exception e) {errors += e.toString()+"\n";}
 
-            try {checkExamTimeCollision(offering, offerings);}
-            catch(Exception e) {errors += e.toString()+"\n";}
+        for (Offering offering : offerings) {
 
             try {checkDuplicateRequest(offering, offerings);}
             catch(Exception e) {errors += e.toString()+"\n";}
@@ -39,12 +39,19 @@ public class EnrollCtrl {
         }
     }
 
-    private void checkExamTimeCollision(Offering offering, List<Offering> offerings) throws EnrollmentRulesViolationException {
-        for (Offering otherOffering : offerings) {
-            if (offering == otherOffering)
-                continue;
-            if (offering.getExamTime().equals(otherOffering.getExamTime()))
-                throw new EnrollmentRulesViolationException(String.format("Two offerings %s and %s have the same exam time", offering, otherOffering));
+    private void checkExamTimeCollision(List<Offering> offerings) throws EnrollmentRulesViolationException {
+		String errors = "";
+        for (Offering offering : offerings) {
+            for (Offering otherOffering : offerings) {
+                if (offering == otherOffering)
+                    continue;
+                if (offering.getExamTime().equals(otherOffering.getExamTime()))
+                    errors += String.format("Two offerings %s and %s have the same exam time", offering, otherOffering);
+            }
+		}
+
+        if (errors.length() > 0) {
+            throw new EnrollmentRulesViolationException(errors);
         }
     }
 
