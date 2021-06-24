@@ -25,11 +25,8 @@ public class EnrollCtrl {
         try {checkExamTimeCollision(offerings);}
         catch(Exception e) {errors += e.toString()+"\n";}
 
-        for (Offering offering : offerings) {
-
-            try {checkDuplicateRequest(offering, offerings);}
-            catch(Exception e) {errors += e.toString()+"\n";}
-		}
+        try {checkDuplicateRequest(offerings);}
+        catch(Exception e) {errors += e.toString()+"\n";}
         
         try {checkUnitsLimitation(offerings, transcript);}
         catch(Exception e) {errors += e.toString()+"\n";}
@@ -55,12 +52,19 @@ public class EnrollCtrl {
         }
     }
 
-    private void checkDuplicateRequest(Offering offering, List<Offering> offerings) throws EnrollmentRulesViolationException {
-        for (Offering otherOffering : offerings) {
-            if (offering == otherOffering)
-                continue;
-            if (offering.getCourse().equals(otherOffering.getCourse()))
-                throw new EnrollmentRulesViolationException(String.format("%s is requested to be taken twice", offering.getCourse().getName()));
+    private void checkDuplicateRequest(List<Offering> offerings) throws EnrollmentRulesViolationException {
+		String errors = "";
+        for (Offering offering : offerings) {
+            for (Offering otherOffering : offerings) {
+                if (offering == otherOffering)
+                    continue;
+                if (offering.getCourse().equals(otherOffering.getCourse()))
+                    errors += String.format("%s is requested to be taken twice", offering.getCourse().getName());
+            }
+		}
+
+        if (errors.length() > 0) {
+            throw new EnrollmentRulesViolationException(errors);
         }
     }
 
