@@ -37,4 +37,8 @@ public class Offering {
 	}
 
 	public int getSection() { return section; }
+
+	public boolean hasExamTimeCollision(Offering other) {
+		return this.getExamTime().equals(other.getExamTime());
+	}
 }

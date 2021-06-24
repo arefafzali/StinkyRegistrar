@@ -31,7 +31,7 @@ public class EnrollCtrl {
             for (Offering otherOffering : offerings) {
                 if (offering == otherOffering)
                     continue;
-                if (offering.getExamTime().equals(otherOffering.getExamTime()))
+                if (offering.hasExamTimeCollision(otherOffering))
                     errors += String.format("Two offerings %s and %s have the same exam time\n", offering, otherOffering);
             }
 		}
