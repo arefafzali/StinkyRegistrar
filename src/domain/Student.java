@@ -8,16 +8,8 @@ public class Student {
 	private String id;
 	private String name;
 
-	static class CourseSection {
-        CourseSection(Course course, int section) {
-            this.course = course;
-            this.section = section;
-        }
-        Course course;
-	    int section;
-    }
 	private Transcript transcript;
-	private List<CourseSection> currentTerm;
+	private List<Offering> currentTerm;
 
 	public Student(String id, String name) {
 		this.id = id;
@@ -27,7 +19,7 @@ public class Student {
 	}
 	
 	public void takeCourse(Course c, int section) {
-		currentTerm.add(new CourseSection(c, section));
+		currentTerm.add(new Offering(c, section));
 	}
 
 	public Transcript getTranscript() {
@@ -46,7 +38,7 @@ public class Student {
 		return this.transcript.calculateGpa();
 	}
 
-    public List<CourseSection> getCurrentTerm() {
+    public List<Offering> getCurrentTerm() {
         return currentTerm;
     }
 

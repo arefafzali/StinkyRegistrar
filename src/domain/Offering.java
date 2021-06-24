@@ -18,6 +18,12 @@ public class Offering {
 		this.examDate = examDate;
 	}
 
+	public Offering(Course course, int section) {
+		this.course = course;
+		this.section = section;
+		this.examDate = null;
+	}
+
 	public Offering(Course course, Date examDate, int section) {
 		this.course = course;
 		this.section = section;
