@@ -7,18 +7,19 @@ import domain.exceptions.EnrollmentRulesViolationException;
 
 public class EnrollCtrl {
 	public void enroll(Student student, List<Offering> offerings) throws EnrollmentRulesViolationException {
-        Map<Term, Map<Course, Double>> transcript = student.getTranscript();
-        checkExceptions(offerings, transcript);
+        checkExceptions(offerings, student);
 		for (Offering offering : offerings)
 			student.takeCourse(offering.getCourse(), offering.getSection());
 	}
 
-    private void checkExceptions(List<Offering> offerings, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
+    private void checkExceptions(List<Offering> offerings, Student student) throws EnrollmentRulesViolationException {
 		String errors = "";
-        errors += anyAlreadyPassedErrors(offerings, transcript);
-        errors += prerequisitesErrors(offerings, transcript);
+        errors += anyAlreadyPassedErrors(offerings, student);
+        errors += prerequisitesErrors(offerings, student);
         errors += examTimeCollisionErrors(offerings);
         errors += duplicateRequestErrors(offerings);
+        
+        Map<Term, Map<Course, Double>> transcript = student.getTranscript();
         errors += unitsLimitationErrors(offerings, transcript);
 
         if (errors.length() > 0) {
@@ -52,33 +53,23 @@ public class EnrollCtrl {
         return errors;
     }
 
-    private String prerequisitesErrors(List<Offering> offerings, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
+    private String prerequisitesErrors(List<Offering> offerings, Student student) throws EnrollmentRulesViolationException {
 		String errors = "";
         for (Offering offering : offerings) {
             List<Course> prereqs = offering.getCourse().getPrerequisites();
-            nextPre:
             for (Course pre : prereqs) {
-                for (Map.Entry<Term, Map<Course, Double>> tr : transcript.entrySet()) {
-                    for (Map.Entry<Course, Double> r : tr.getValue().entrySet()) {
-                        if (r.getKey().equals(pre) && r.getValue() >= 10)
-                            continue nextPre;
-                    }
-                }
-                errors += String.format("The student has not passed %s as a prerequisite of %s\n", pre.getName(), offering.getCourse().getName());
+                if (!hasPassed(student, pre))
+                    errors += String.format("The student has not passed %s as a prerequisite of %s\n", pre.getName(), offering.getCourse().getName());
             }
         }
         return errors;
     }
 
-    private String anyAlreadyPassedErrors(List<Offering> offerings, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
+    private String anyAlreadyPassedErrors(List<Offering> offerings, Student student) throws EnrollmentRulesViolationException {
 		String errors = "";
         for (Offering offering : offerings) {
-            for (Map.Entry<Term, Map<Course, Double>> tr : transcript.entrySet()) {
-                for (Map.Entry<Course, Double> r : tr.getValue().entrySet()) {
-                    if (r.getKey().equals(offering.getCourse()) && r.getValue() >= 10)
-                        errors += String.format("The student has already passed %s\n", offering.getCourse().getName());
-                }
-            }
+            if (hasPassed(student, offering.getCourse()))
+                errors += String.format("The student has already passed %s\n", offering.getCourse().getName());
         }
         return errors;
     }
@@ -106,5 +97,16 @@ public class EnrollCtrl {
 		}
 		double gpa = points / totalUnits;
         return gpa;
+    }
+
+    private boolean hasPassed(Student student, Course course) {
+        Map<Term, Map<Course, Double>> transcript = student.getTranscript();
+        for (Map.Entry<Term, Map<Course, Double>> tr : transcript.entrySet()) {
+            for (Map.Entry<Course, Double> r : tr.getValue().entrySet()) {
+                if (r.getKey().equals(course) && r.getValue() >= 10)
+                    return true;
+            }
+        }
+        return false;
     }
 }
