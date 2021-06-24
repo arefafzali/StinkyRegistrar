@@ -41,4 +41,8 @@ public class Offering {
 	public boolean hasExamTimeCollision(Offering other) {
 		return this.getExamTime().equals(other.getExamTime());
 	}
+
+	public boolean hasSameCourse(Offering other) {
+		return this.getCourse().equals(other.getCourse());
+	}
 }

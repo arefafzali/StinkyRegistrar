@@ -44,7 +44,7 @@ public class EnrollCtrl {
             for (Offering otherOffering : offerings) {
                 if (offering == otherOffering)
                     continue;
-                if (offering.getCourse().equals(otherOffering.getCourse()))
+                if (offering.hasSameCourse(otherOffering))
                     errors += String.format("%s is requested to be taken twice\n", offering.getCourse().getName());
             }
 		}
