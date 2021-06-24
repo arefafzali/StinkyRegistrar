@@ -19,10 +19,10 @@ public class EnrollCtrl {
         try {checkAnyAlreadyPassed(offerings, transcript);}
         catch(Exception e) {errors += e.toString()+"\n";}
 
-        for (Offering offering : offerings) {
+        try {checkPrerequisites(offerings, transcript);}
+        catch(Exception e) {errors += e.toString()+"\n";}
 
-            try {checkPrerequisites(offering, transcript);}
-            catch(Exception e) {errors += e.toString()+"\n";}
+        for (Offering offering : offerings) {
 
             try {checkExamTimeCollision(offering, offerings);}
             catch(Exception e) {errors += e.toString()+"\n";}
@@ -57,17 +57,24 @@ public class EnrollCtrl {
         }
     }
 
-    private void checkPrerequisites(Offering offering, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
-        List<Course> prereqs = offering.getCourse().getPrerequisites();
-        nextPre:
-        for (Course pre : prereqs) {
-            for (Map.Entry<Term, Map<Course, Double>> tr : transcript.entrySet()) {
-                for (Map.Entry<Course, Double> r : tr.getValue().entrySet()) {
-                    if (r.getKey().equals(pre) && r.getValue() >= 10)
-                        continue nextPre;
+    private void checkPrerequisites(List<Offering> offerings, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
+		String errors = "";
+        for (Offering offering : offerings) {
+            List<Course> prereqs = offering.getCourse().getPrerequisites();
+            nextPre:
+            for (Course pre : prereqs) {
+                for (Map.Entry<Term, Map<Course, Double>> tr : transcript.entrySet()) {
+                    for (Map.Entry<Course, Double> r : tr.getValue().entrySet()) {
+                        if (r.getKey().equals(pre) && r.getValue() >= 10)
+                            continue nextPre;
+                    }
                 }
+                errors += String.format("The student has not passed %s as a prerequisite of %s", pre.getName(), offering.getCourse().getName());
             }
-            throw new EnrollmentRulesViolationException(String.format("The student has not passed %s as a prerequisite of %s", pre.getName(), offering.getCourse().getName()));
+        }
+
+        if (errors.length() > 0) {
+            throw new EnrollmentRulesViolationException(errors);
         }
     }
 
