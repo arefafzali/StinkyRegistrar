@@ -18,9 +18,7 @@ public class EnrollCtrl {
         errors += prerequisitesErrors(offerings, student);
         errors += examTimeCollisionErrors(offerings);
         errors += duplicateRequestErrors(offerings);
-        
-        Map<Term, Map<Course, Double>> transcript = student.getTranscript();
-        errors += unitsLimitationErrors(offerings, transcript);
+        errors += unitsLimitationErrors(offerings, student);
 
         if (errors.length() > 0) {
             throw new EnrollmentRulesViolationException(errors);
@@ -73,11 +71,11 @@ public class EnrollCtrl {
         return errors;
     }
 
-    private String unitsLimitationErrors(List<Offering> offerings, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
+    private String unitsLimitationErrors(List<Offering> offerings, Student student) throws EnrollmentRulesViolationException {
         int unitsRequested = 0;
 		for (Offering offering : offerings)
 			unitsRequested += offering.getCourse().getUnits();
-        double gpa = calculateGpa(transcript);
+        double gpa = calculateGpa(student);
 		if ((gpa < 12 && unitsRequested > 14) ||
 				(gpa < 16 && unitsRequested > 16) ||
 				(unitsRequested > 20))
@@ -85,10 +83,10 @@ public class EnrollCtrl {
         return "";
     }
 
-    private double calculateGpa(Map<Term, Map<Course, Double>> transcript){
+    private double calculateGpa(Student student){
         double points = 0;
 		int totalUnits = 0;
-        for (Map.Entry<Term, Map<Course, Double>> tr : transcript.entrySet()) {
+        for (Map.Entry<Term, Map<Course, Double>> tr : student.getTranscript().entrySet()) {
             for (Map.Entry<Course, Double> r : tr.getValue().entrySet()) {
                 points += r.getValue() * r.getKey().getUnits();
                 totalUnits += r.getKey().getUnits();
