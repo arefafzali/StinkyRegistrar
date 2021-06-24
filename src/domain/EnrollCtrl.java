@@ -6,30 +6,30 @@ import java.util.Map;
 import domain.exceptions.EnrollmentRulesViolationException;
 
 public class EnrollCtrl {
-	public void enroll(Student s, List<Offering> courses) throws EnrollmentRulesViolationException {
-        Map<Term, Map<Course, Double>> transcript = s.getTranscript();
-        checkExceptions(courses, transcript);
-		for (Offering o : courses)
-			s.takeCourse(o.getCourse(), o.getSection());
+	public void enroll(Student student, List<Offering> offerings) throws EnrollmentRulesViolationException {
+        Map<Term, Map<Course, Double>> transcript = student.getTranscript();
+        checkExceptions(offerings, transcript);
+		for (Offering offering : offerings)
+			student.takeCourse(offering.getCourse(), offering.getSection());
 	}
 
-    private void checkExceptions(List<Offering> courses, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
+    private void checkExceptions(List<Offering> offerings, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
 		String errors = "";
-        for (Offering o : courses) {
-            try {checkIfAlreadyPassed(o, transcript);}
+        for (Offering offering : offerings) {
+            try {checkIfAlreadyPassed(offering, transcript);}
             catch(Exception e) {errors += e.toString()+"\n";}
 
-            try {checkPrerequisites(o, transcript);}
+            try {checkPrerequisites(offering, transcript);}
             catch(Exception e) {errors += e.toString()+"\n";}
 
-            try {checkExamTimeCollision(o, courses);}
+            try {checkExamTimeCollision(offering, offerings);}
             catch(Exception e) {errors += e.toString()+"\n";}
 
-            try {checkDuplicateRequest(o, courses);}
+            try {checkDuplicateRequest(offering, offerings);}
             catch(Exception e) {errors += e.toString()+"\n";}
 		}
         
-        try {checkUnitsLimitation(courses, transcript);}
+        try {checkUnitsLimitation(offerings, transcript);}
         catch(Exception e) {errors += e.toString()+"\n";}
 
         if (errors.length() > 0) {
@@ -37,26 +37,26 @@ public class EnrollCtrl {
         }
     }
 
-    private void checkExamTimeCollision(Offering o, List<Offering> courses) throws EnrollmentRulesViolationException {
-        for (Offering o2 : courses) {
-            if (o == o2)
+    private void checkExamTimeCollision(Offering offering, List<Offering> offerings) throws EnrollmentRulesViolationException {
+        for (Offering offering2 : offerings) {
+            if (offering == offering2)
                 continue;
-            if (o.getExamTime().equals(o2.getExamTime()))
-                throw new EnrollmentRulesViolationException(String.format("Two offerings %s and %s have the same exam time", o, o2));
+            if (offering.getExamTime().equals(offering2.getExamTime()))
+                throw new EnrollmentRulesViolationException(String.format("Two offerings %s and %s have the same exam time", offering, offering2));
         }
     }
 
-    private void checkDuplicateRequest(Offering o, List<Offering> courses) throws EnrollmentRulesViolationException {
-        for (Offering o2 : courses) {
-            if (o == o2)
+    private void checkDuplicateRequest(Offering offering, List<Offering> offerings) throws EnrollmentRulesViolationException {
+        for (Offering offering2 : offerings) {
+            if (offering == offering2)
                 continue;
-            if (o.getCourse().equals(o2.getCourse()))
-                throw new EnrollmentRulesViolationException(String.format("%s is requested to be taken twice", o.getCourse().getName()));
+            if (offering.getCourse().equals(offering2.getCourse()))
+                throw new EnrollmentRulesViolationException(String.format("%s is requested to be taken twice", offering.getCourse().getName()));
         }
     }
 
-    private void checkPrerequisites(Offering o, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
-        List<Course> prereqs = o.getCourse().getPrerequisites();
+    private void checkPrerequisites(Offering offering, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
+        List<Course> prereqs = offering.getCourse().getPrerequisites();
         nextPre:
         for (Course pre : prereqs) {
             for (Map.Entry<Term, Map<Course, Double>> tr : transcript.entrySet()) {
@@ -65,23 +65,23 @@ public class EnrollCtrl {
                         continue nextPre;
                 }
             }
-            throw new EnrollmentRulesViolationException(String.format("The student has not passed %s as a prerequisite of %s", pre.getName(), o.getCourse().getName()));
+            throw new EnrollmentRulesViolationException(String.format("The student has not passed %s as a prerequisite of %s", pre.getName(), offering.getCourse().getName()));
         }
     }
 
-    private void checkIfAlreadyPassed(Offering o, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
+    private void checkIfAlreadyPassed(Offering offering, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
         for (Map.Entry<Term, Map<Course, Double>> tr : transcript.entrySet()) {
             for (Map.Entry<Course, Double> r : tr.getValue().entrySet()) {
-                if (r.getKey().equals(o.getCourse()) && r.getValue() >= 10)
-                    throw new EnrollmentRulesViolationException(String.format("The student has already passed %s", o.getCourse().getName()));
+                if (r.getKey().equals(offering.getCourse()) && r.getValue() >= 10)
+                    throw new EnrollmentRulesViolationException(String.format("The student has already passed %s", offering.getCourse().getName()));
             }
         }
     }
 
-    private void checkUnitsLimitation(List<Offering> courses, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
+    private void checkUnitsLimitation(List<Offering> offerings, Map<Term, Map<Course, Double>> transcript) throws EnrollmentRulesViolationException {
         int unitsRequested = 0;
-		for (Offering o : courses)
-			unitsRequested += o.getCourse().getUnits();
+		for (Offering offering : offerings)
+			unitsRequested += offering.getCourse().getUnits();
         double gpa = calculateGpa(transcript);
 		if ((gpa < 12 && unitsRequested > 14) ||
 				(gpa < 16 && unitsRequested > 16) ||
